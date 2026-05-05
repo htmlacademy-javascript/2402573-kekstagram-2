@@ -1,7 +1,5 @@
-import { createPhotos } from './generate-data';
+import { photos } from './generate-data';
 export const renderThumbnails = () => {
-  const photos = createPhotos();
-
   const photoTemplate = document.querySelector('#picture').content;
   const photoContainer = document.querySelector('.pictures');
 
