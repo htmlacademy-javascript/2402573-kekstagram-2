@@ -1,8 +1,9 @@
 import { openModal, closeModal } from './modal.js';
+import { initImageScale } from './image-scale.js';
+import { initImageEffects } from './image-filters.js';
 
 const MAX_HASHTAG_COUNT = 5;
 const MAX_COMMENT_LENGTH = 140;
-const TAG_ERROR_TEXT = 'Неправильно заполнены хэштеги';
 const HASHTAG_REGEXP = /^#[a-zа-я0-9]{1,19}$/i;
 
 const form = document.querySelector('.img-upload__form');
@@ -23,6 +24,8 @@ const pristine = new Pristine(form, {
 export const initUploadForm = () => {
   fileInput.addEventListener('change', () => {
     openModal(uploadOverlay, body);
+    initImageScale();
+    initImageEffects();
   });
 
   cancelBtn.addEventListener('click', () => {
@@ -31,18 +34,51 @@ export const initUploadForm = () => {
     fileInput.value = '';
     pristine.reset();
   });
-  const validateTags = (value) => {
-    if (!value) {
-      return true;
+
+  const stopEscPropagation = (evt) => {
+    if (evt.key === 'Escape') {
+      evt.stopPropagation();
     }
-    const splitHashtags = value.split(' ').filter(Boolean);
-    const lowerCaseHashtags = splitHashtags.map((hashtag) => hashtag.toLowerCase());
-    const sizeUnique = new Set(lowerCaseHashtags).size;
-    if (splitHashtags.length > MAX_HASHTAG_COUNT || splitHashtags.length !== sizeUnique) {
-      return false;
-    }
-    return splitHashtags.every((hashtag) => HASHTAG_REGEXP.test(hashtag));
   };
+
+  const parseHashTags = (value) => {
+    if (!value) {
+      return [];
+    }
+    return value.split(' ').filter(Boolean);
+  };
+
+  const validateHashtagFormat = (value) => {
+    const tags = parseHashTags(value);
+    return tags.every((tag) => HASHTAG_REGEXP.test(tag));
+  };
+
+  const validateHashtagCount = (value) => {
+    const tags = parseHashTags(value);
+    return tags.length <= MAX_HASHTAG_COUNT;
+  };
+
+  const validateHashtagUnique = (value) => {
+    const tags = parseHashTags(value);
+    const lowerCaseHashtags = tags.map((tag) => tag.toLowerCase());
+    const sizeUnique = new Set(lowerCaseHashtags).size;
+    return tags.length === sizeUnique;
+  };
+
+  const hashtagValidators = [
+    {
+      validator: validateHashtagFormat,
+      error: 'Хэштег должен начинаться с # и содержать только буквы и цифры, максимум 20 символов'
+    },
+    {
+      validator: validateHashtagCount,
+      error: 'Количество хэштегов не может быть больше 5'
+    },
+    {
+      validator: validateHashtagUnique,
+      error: 'Хэштеги не могут повторяться'
+    },
+  ];
 
   const validateComment = (value) => {
     if (!value) {
@@ -52,11 +88,9 @@ export const initUploadForm = () => {
     return value.length <= MAX_COMMENT_LENGTH;
   };
 
-  pristine.addValidator(
-    hashtagInput,
-    validateTags,
-    TAG_ERROR_TEXT
-  );
+  hashtagValidators.forEach((rule) => {
+    pristine.addValidator(hashtagInput, rule.validator, rule.error);
+  });
 
   pristine.addValidator(
     commentInput,
@@ -72,11 +106,6 @@ export const initUploadForm = () => {
     }
   });
 
-  const stopEscPropagation = (evt) => {
-    if (evt.key === 'Escape') {
-      evt.stopPropagation();
-    }
-  };
   hashtagInput.addEventListener('keydown', stopEscPropagation);
   commentInput.addEventListener('keydown', stopEscPropagation);
 };
