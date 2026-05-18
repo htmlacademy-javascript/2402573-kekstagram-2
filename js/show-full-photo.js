@@ -1,4 +1,3 @@
-import { photos } from './generate-data';
 import { closeModal, openModal } from './modal.js';
 import { paginateComments } from './comments.js';
 
@@ -22,7 +21,7 @@ const fillPhotoData = (currentPhoto) => {
   comments.innerHTML = '';
 };
 
-export const showFullPhoto = () => {
+export const showFullPhoto = (photos) => {
   const commentsLoaderBtn = document.querySelector('.comments-loader');
   const shownCommentsCount = document.querySelector('.social__comment-shown-count');
   pictureContainer.addEventListener('click', (evt) => {

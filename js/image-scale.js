@@ -5,7 +5,7 @@ const scaleControlValue = form.querySelector('.scale__control--value');
 const uploadedImage = form.querySelector('.img-upload__preview img');
 
 let currentScale = 100;
-export const initImageScale = () => {
+const initImageScale = () => {
   scaleSmallerBtn.addEventListener('click', () => {
     if (currentScale > 25) {
       currentScale -= 25;
@@ -22,3 +22,11 @@ export const initImageScale = () => {
     }
   });
 };
+
+const resetImageScale = () => {
+  currentScale = 100;
+  scaleControlValue.value = `${currentScale}%`;
+  uploadedImage.style.transform = 'scale(1)';
+};
+
+export { resetImageScale, initImageScale};
