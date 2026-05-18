@@ -14,7 +14,7 @@ const uploadedImage = form.querySelector('.img-upload__preview img');
 const effectRadios = form.querySelectorAll('input[name="effect"]');
 const inputValue = form.querySelector('.effect-level__value');
 
-export const initImageEffects = () => {
+const initImageEffects = () => {
   let selectedFilter = 'none';
   noUiSlider.create(slider, {
     range: {
@@ -58,3 +58,12 @@ export const initImageEffects = () => {
     });
   });
 };
+
+const resetImageEffects = () => {
+  const noneRadioBtn = form.querySelector('input[value="none"]');
+  noneRadioBtn.checked = true;
+  sliderContainer.classList.add('hidden');
+  uploadedImage.style.filter = '';
+};
+
+export { resetImageEffects, initImageEffects};
